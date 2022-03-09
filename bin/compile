@@ -6,10 +6,6 @@ function log() {
     echo "-----> $*"
 }
 
-function indent() {
-    sed -e 's/^/       /'
-}
-
 export BUILD_DIR="$1"
 export ENV_DIR="$3"
 BP_DIR=$(cd "$(dirname "${0:-}")"; cd ..; pwd)
