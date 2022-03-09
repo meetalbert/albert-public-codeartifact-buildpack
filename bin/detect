@@ -4,8 +4,9 @@ set -euo pipefail
 
 BUILD_DIR="$1"
 
-if [ ! -f "$BUILD_DIR/poetry.lock" ] ; then
-    exit 1
-fi
+# if [ -z "${AWS_CODEARTIFACT}"]
+# if [ ! -f "$BUILD_DIR/poetry.lock" ] ; then
+#     exit 1
+# fi
 
-echo "Python Poetry"
+echo "AWS CodeArtifact"
