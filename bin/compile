@@ -17,15 +17,20 @@ for env_file in "$ENV_DIR"/AWS_CODEARTIFACT_* ; do
     export "$(basename "$env_file")=$(cat "$env_file" 2>/dev/null)"
 done
 
-# Set the AWS credentials to the CodeArtifact IAM role
-export AWS_ACCESS_KEY_ID=$AWS_CODEARTIFACT_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$AWS_CODEARTIFACT_SECRET_ACCESS_KEY
+if [[ -z $AWS_CODEARTIFACT_ACCESS_KEY_ID || -z $AWS_CODEARTIFACT_ACCESS_KEY_ID || -z $AWS_CODEARTIFACT_GET_AUTHORIZATION_TOKEN_ARGS || -z $AWS_CODEARTIFACT_URL ]]; then
+    log "not all AWS_CODEARTIFACT_* vars are set, skipping"
+    loog "requires AWS_CODEARTIFACT_ACCESS_KEY_ID, AWS_CODEARTIFACT_ACCESS_KEY_ID, AWS_CODEARTIFACT_GET_AUTHORIZATION_TOKEN_ARGS, AWS_CODEARTIFACT_URL"
+else
+    # Set the AWS credentials to the CodeArtifact IAM role
+    export AWS_ACCESS_KEY_ID=$AWS_CODEARTIFACT_ACCESS_KEY_ID
+    export AWS_SECRET_ACCESS_KEY=$AWS_CODEARTIFACT_SECRET_ACCESS_KEY
 
-# Get the CodeArtifact authorization token
-CODEARTIFACT_AUTH_TOKEN_COMMAND="aws codeartifact get-authorization-token $AWS_CODEARTIFACT_GET_AUTHORIZATION_TOKEN_ARGS"
-CODEARTIFACT_AUTH_TOKEN=$($CODEARTIFACT_AUTH_TOKEN_COMMAND)
-EXTRA_INDEX_URL="https://aws:$CODEARTIFACT_AUTH_TOKEN@$AWS_CODEARTIFACT_URL"
+    # Get the CodeArtifact authorization token
+    CODEARTIFACT_AUTH_TOKEN_COMMAND="aws codeartifact get-authorization-token $AWS_CODEARTIFACT_GET_AUTHORIZATION_TOKEN_ARGS"
+    CODEARTIFACT_AUTH_TOKEN=$($CODEARTIFACT_AUTH_TOKEN_COMMAND)
+    EXTRA_INDEX_URL="https://aws:$CODEARTIFACT_AUTH_TOKEN@$AWS_CODEARTIFACT_URL"
 
-# Export the PIP_EXTRA_INDEX_URL which will be picked up in the Poetry build pack
-log "setting PIP_EXTRA_INDEX_URL"
-echo "export PIP_EXTRA_INDEX_URL=\"$EXTRA_INDEX_URL\"" > "$BP_DIR/export"
+    # Export the PIP_EXTRA_INDEX_URL which will be picked up in the Poetry build pack
+    log "setting PIP_EXTRA_INDEX_URL"
+    echo "export PIP_EXTRA_INDEX_URL=\"$EXTRA_INDEX_URL\"" > "$BP_DIR/export"
+fi
